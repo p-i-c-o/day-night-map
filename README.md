@@ -1,122 +1,422 @@
 
 # Day/Night World Map
 
-A real-time visualization of day and night regions across the world using accurate solar and lunar positioning calculations.
+A real-time visualization of daylight, darkness, and twilight across Earth, featuring solar and lunar positioning, local astronomical information, and a dedicated dashboard optimized for e-ink displays.
 
-![Day Night Map Screenshot](map.png)
+Based on [lanrat/day-night-map](https://github.com/lanrat/day-night-map), with additional display modes and dashboard functionality.
+
+**Live application:** https://p-i-c-o.github.io/day-night-map/
+
+![Day/Night World Map](map.png)
 
 ## Features
 
-- Real-time day/night terminator line based on current UTC time
-- Smooth twilight gradients showing dawn and dusk zones with professional SunCalc integration
-- Solar position indicator showing where the sun is directly overhead
-- Lunar position indicator showing where the moon is directly overhead with variable size based on distance
-- Accurate moon phase visualization showing current illumination using SunCalc calculations
-- Moon phase name and illumination percentage display
-- Responsive design with normal and minimal viewing modes
-- 3-column information panel showing date, sunrise/sunset times, and moon phase
-- Enhanced astronomical data including solar noon, golden hour times, and moon rise/set times
-- Location detection via URL parameters or HTML5 Geolocation API
-- Optional location marker showing the calculation point on the map
-- Grayscale mode optimized for e-ink displays with smooth gradient transitions
-- Dual projection support: Equirectangular (default) and Mercator projections
-- Accurate coordinate mapping with selectable projection types to match different world map formats
+- Real-time visualization of day and night across Earth
+- Smooth twilight gradients representing dawn and dusk
+- Solar and lunar position markers
+- Moon phase visualization and illumination calculations
+- Sunrise, sunset, solar noon, and golden hour information
+- Moonrise and moonset calculations
+- Location selection through URL parameters or browser geolocation
+- Optional location marker
+- Configurable timezone using IANA timezone identifiers
+- Grayscale rendering optimized for e-ink displays
+- Equirectangular and Mercator projection options
+- Responsive layouts for desktop, mobile, and embedded displays
+- Static astronomical snapshots using Unix timestamps
+- Automatic map updates every minute
+
+### Display Modes
+
+The application supports three viewing modes.
+
+| Mode | Parameter | Description |
+|---|---|---|
+| Normal | None | Full interface with astronomical information |
+| Minimal | `minimal` | Full-screen map with compact information panels |
+| Map Only | `maponly` | E-ink dashboard with date, world map, and solar information |
+
+All modes support grayscale rendering, location markers, timezone configuration, and astronomical positioning options.
 
 ## Usage
 
-- **Normal mode**: Open [lanrat.github.io/day-night-map/](https://lanrat.github.io/day-night-map/) in a web browser
-- **Minimal mode**: Open [lanrat.github.io/day-night-map/?minimal](https://lanrat.github.io/day-night-map/?minimal) for a full-screen view with info bar at bottom
-- **Grayscale mode**: Add `&grayscale` to any URL for optimized display on grayscale/e-ink displays (e.g., `?minimal&grayscale`)
-- **Static timestamp mode**: Add `&timestamp=<unix_timestamp>` to display the map at a specific time instead of current time
+### Normal Mode
 
-### URL Parameters
+The original interface, displaying the world map alongside solar and lunar information.
 
-All parameters can be combined and used with either query string (`?`) or hash (`#`) format:
+https://p-i-c-o.github.io/day-night-map/
 
-- `minimal` - Full-screen minimal view
-- `grayscale` - Optimized for grayscale/e-ink displays  
-- `timestamp=<value>` - Display map at specific time (Unix timestamp in seconds or milliseconds)
-- `timezone=<value>` - Display date/time in specified timezone (IANA timezone name, defaults to user's local timezone)
-- `lat=<value>` - User latitude for location-based astronomical calculations (-90 to 90)
-- `lon=<value>` - User longitude for location-based astronomical calculations (-180 to 180)
-- `showloc` - Display a location marker dot at the specified lat/lon coordinates on the map
-- `nosun` - Hide the sun position marker from both the map and legend
-- `nomoon` - Hide the moon position marker from both the map and legend
-- `projection=<value>` - Map projection type: `equirectangular` (default, matches most world map SVGs) or `mercator` (Web Mercator projection)
-- `hour24` - Display all times in 24-hour format instead of 12-hour AM/PM format
+### Minimal Mode
 
-**Examples:**
+An optimized full-screen layout with compact information panels.
 
-- `?minimal&grayscale` - Minimal grayscale mode
-- `?timestamp=1672531200` - New Year 2023 at midnight UTC
-- `?timezone=America/New_York` - Display time in Eastern timezone
-- `?timezone=Asia/Tokyo&minimal` - Tokyo time in minimal mode
-- `#minimal&timestamp=1672531200000` - Minimal mode at specific time (milliseconds)
-- `?minimal&grayscale&timestamp=1640995200&timezone=Europe/London` - All parameters combined
-- `?hour24` - Display all times in 24-hour format
-- `?hour24&timezone=Europe/Berlin` - 24-hour format with Berlin timezone
-- `?lat=40.7128&lon=-74.0060` - New York City location for sunrise/sunset calculations
-- `?lat=51.5074&lon=-0.1278&timezone=Europe/London` - London coordinates with local timezone
-- `?lat=35.6762&lon=139.6503&hour24&timezone=Asia/Tokyo` - Tokyo location with 24-hour format
-- `?lat=37.7749&lon=-122.4194&showloc` - San Francisco with location marker dot
-- `?lat=35.6762&lon=139.6503&showloc&grayscale` - Tokyo with location marker in grayscale mode
-- `?nosun` - Day/night map without sun marker (minimal display)
-- `?nomoon` - Day/night map without moon marker
-- `?nosun&nomoon` - Clean day/night map with no celestial body markers
-- `?minimal&grayscale&nosun&nomoon` - Ultra-minimal grayscale display with only day/night regions
-- `?projection=mercator` - Use Mercator projection instead of equirectangular
-- `?lat=40.7589&lon=-73.9851&showloc&projection=mercator&minimal` - Times Square with Mercator projection in minimal mode
+https://p-i-c-o.github.io/day-night-map/?minimal
 
-## Technical Details
+### Map Only Dashboard
 
-The application uses the professional-grade [SunCalc library](https://github.com/mourner/suncalc) for accurate astronomical calculations combined with custom algorithms for celestial positioning. Solar and lunar positions are calculated using hybrid approaches that leverage SunCalc for complex calculations while maintaining efficient custom code for subsolar/sublunar point positioning.
+A dedicated dashboard originally designed for the Kobo Libra 2 and LaraPaper.
 
-### SunCalc Integration Features
+https://p-i-c-o.github.io/day-night-map/?maponly&grayscale
 
-- **Solar calculations**: Sunrise/sunset times, solar noon, golden hour periods, and solar elevation angles
-- **Lunar calculations**: Moon phase, illumination fraction, moonrise/moonset times, and lunar distance for variable sizing
-- **Location support**: Automatic geolocation detection or manual coordinates via URL parameters
-- **Timezone awareness**: Display times in any IANA timezone with fallback to user's local timezone
+Features:
 
-### Rendering System
+- Large date header formatted as `YY/MM/DD`
+- Muted grey "Day / Night" heading
+- Centered world map preserving its 2:1 aspect ratio
+- Sunrise and sunset times
+- Calculated daylight duration
+- Minimalist typography using Inter
+- High-contrast grayscale visualization
+- Responsive layout without unnecessary information panels
 
-The day/night visualization uses HTML5 Canvas with optimized pixel-level rendering:
+The dashboard retains the sun and moon position markers while omitting the original moon phase and detailed astronomical information panels.
 
-- **Twilight gradients**: Smooth transitions through astronomical, nautical, and civil twilight zones
-- **Grayscale optimization**: E-ink friendly rendering with smooth gradients (not just 3-shade discrete zones)
-- **Variable moon sizing**: Moon size changes based on actual Earth-Moon distance (perigee vs apogee)
-- **Edge wrapping**: Celestial bodies wrap around map edges for continuous world view
-- **Location markers**: Optional red location dot (black in grayscale) with white border to mark calculation coordinates
-- **Dynamic legend**: Location marker automatically appears in legend when `showloc` parameter is used
+The sunrise, sunset, and daylight statistics require valid geographic coordinates.
+
+**Example with Geneva coordinates:**
+
+https://p-i-c-o.github.io/day-night-map/?maponly&grayscale&showloc&lat=46.2044&lon=6.1432&timezone=Europe/Zurich
+
+## URL Parameters
+
+Parameters can be combined using standard query strings (`?`) or URL fragments (`#`).
+
+### Display
+
+| Parameter | Description |
+|---|---|
+| `minimal` | Enable the original minimal layout |
+| `maponly` | Enable the custom dashboard layout |
+| `grayscale` | Enable grayscale rendering |
+| `hour24` | Use 24-hour time formatting |
+| `projection=mercator` | Select Mercator projection |
+| `projection=equirectangular` | Select the default projection |
+
+### Location
+
+| Parameter | Description |
+|---|---|
+| `lat=<value>` | Latitude, from -90 to 90 |
+| `lon=<value>` | Longitude, from -180 to 180 |
+| `timezone=<value>` | IANA timezone identifier |
+| `showloc` | Display the configured location on the map |
+
+If geographic coordinates are not supplied, the application attempts to use the browser's Geolocation API.
+
+If location detection fails, location-dependent information may be unavailable.
+
+The timezone parameter controls displayed times but does not change the geographic location.
+
+### Celestial Markers
+
+| Parameter | Description |
+|---|---|
+| `nosun` | Hide the sun position marker |
+| `nomoon` | Hide the moon position marker |
+
+These parameters only control the corresponding visual markers and legends. They do not disable the underlying astronomical calculations.
+
+### Time
+
+| Parameter | Description |
+|---|---|
+| `timestamp=<value>` | Render a specific moment using a Unix timestamp |
+
+Timestamps may be supplied in seconds or milliseconds.
+
+When a timestamp is provided, the visualization remains static instead of automatically refreshing.
+
+### Examples
+
+**Minimal grayscale display**
+
+`?minimal&grayscale`
+
+**Map Only dashboard**
+
+`?maponly&grayscale`
+
+**Map Only with location**
+
+`?maponly&grayscale&showloc&lat=46.2044&lon=6.1432`
+
+**Map Only without celestial markers**
+
+`?maponly&grayscale&nosun&nomoon`
+
+**Map Only using London time**
+
+`?maponly&grayscale&lat=51.5074&lon=-0.1278&timezone=Europe/London`
+
+**Tokyo with 24-hour time**
+
+`?lat=35.6762&lon=139.6503&timezone=Asia/Tokyo&hour24`
+
+**Specific historical timestamp**
+
+`?timestamp=1672531200`
+
+**Mercator projection**
+
+`?projection=mercator`
+
+## LaraPaper Integration
+
+The Map Only dashboard is designed to work as an embedded webpage inside a LaraPaper/TRMNL plugin.
+
+The recommended integration uses an iframe pointing to this fork's GitHub Pages deployment.
+
+### Liquid Template
+
+```html
+<div class="view view--{{ size }}">
+  <style>
+    .dnm-view {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .dnm-iframe {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+
+  {% assign dnm_lat = trmnl.plugin_settings.custom_fields_values.latitude | default: '46.2044' %}
+  {% assign dnm_lon = trmnl.plugin_settings.custom_fields_values.longitude | default: '6.1432' %}
+  {% assign dnm_tz = trmnl.user.time_zone_iana | default: 'Europe/Zurich' %}
+
+  <div class="dnm-view">
+    <iframe
+      class="dnm-iframe image-dither"
+      data-pixel-perfect="true"
+      title="Day/night world map"
+      scrolling="no"
+      loading="eager"
+      src="https://p-i-c-o.github.io/day-night-map/?maponly&grayscale&timezone={{ dnm_tz | url_encode }}&lat={{ dnm_lat }}&lon={{ dnm_lon }}&{{ trmnl.plugin_settings.custom_fields_values.showloc }}&{{ trmnl.plugin_settings.custom_fields_values.nosun }}&{{ trmnl.plugin_settings.custom_fields_values.nomoon }}&{{ trmnl.plugin_settings.custom_fields_values.hour24 }}">
+    </iframe>
+  </div>
+</div>
+```
+
+The example defaults to Geneva coordinates and the `Europe/Zurich` timezone when no values are provided.
+
+These defaults should be changed or removed when deploying for other locations.
+
+### Rendering Considerations
+
+LaraPaper captures the rendered plugin as an image.
+
+Because the plugin loads an external webpage, rendering depends on:
+
+1. Network access to GitHub Pages
+2. Successful loading of the map's JavaScript and CSS
+3. Successful loading of SunCalc
+4. Valid geographic coordinates
+5. Sufficient time for JavaScript initialization before screenshot capture
+
+A map can appear even when location-dependent data has not loaded.
+
+If the dashboard displays `--:--`, verify that the date header and solar statistics elements exist and that JavaScript execution completes successfully.
+
+### Caching
+
+GitHub Pages and the LaraPaper screenshot renderer may cache resources independently.
+
+To invalidate the embedded page URL, add or increment a version parameter:
+
+`?maponly&grayscale&v=4`
+
+If JavaScript or CSS remains cached, version the asset references inside `index.html`:
+
+```html
+<link rel="stylesheet" href="styles.css?v=4">
+<script src="script.js?v=4"></script>
+```
+
+Increment these values following relevant changes.
+
+For consistent results, ensure that the deployed GitHub Pages version and the LaraPaper plugin are using compatible parameters.
+
+## Technical Architecture
+
+The application is a static website requiring no dedicated backend.
+
+### Components
+
+| File | Purpose |
+|---|---|
+| `index.html` | Page structure, map container, information panels, dashboard |
+| `styles.css` | Responsive layouts, display modes, grayscale styling |
+| `script.js` | Astronomical calculations, canvas rendering, dashboard updates |
+| `BlankMap-Equirectangular.svg` | Base world map image |
+
+The application can be hosted using GitHub Pages or any static web server.
+
+### Rendering Pipeline
+
+The map combines a static SVG world map with an HTML5 Canvas overlay.
+
+1. The browser loads the base SVG.
+2. JavaScript determines the requested date and time.
+3. Solar and lunar positions are calculated.
+4. Solar elevation is evaluated across the map.
+5. A semi-transparent day/night overlay is rendered.
+6. Optional solar, lunar, and geographic location markers are drawn.
+7. Information panels and dashboard statistics are updated.
+
+The overlay is generated using pixel-level canvas operations.
+
+### Astronomical Calculations
+
+The application integrates [SunCalc](https://github.com/mourner/suncalc) for:
+
+- Sunrise and sunset
+- Solar elevation
+- Solar noon
+- Golden hour periods
+- Moonrise and moonset
+- Moon phase and illumination
+- Lunar distance
+
+Additional custom calculations determine solar and lunar geographic positions.
+
+These calculations are suitable for visualization and general astronomical information, but should not be treated as precision ephemeris data for scientific or navigational purposes.
+
+### Twilight Rendering
+
+The visualization represents the transition between daylight and darkness using solar elevation.
+
+The rendering distinguishes regions around:
+
+- Daylight
+- Civil twilight
+- Nautical twilight
+- Astronomical twilight
+- Deep night
+
+Grayscale mode converts the representation into shades suitable for monochrome and e-ink displays.
+
+Night shading is applied using transparency rather than simply replacing the map with solid colors.
+
+### Location and Timezone Handling
+
+Location and timezone are separate settings.
+
+**Coordinates** determine local astronomical events and the optional location marker.
+
+**Timezone** determines how dates and times are formatted.
+
+For example:
+
+`?lat=46.2044&lon=6.1432&timezone=Europe/Zurich`
+
+If coordinates are absent, the application attempts browser geolocation.
+
+If the timezone is absent, the browser's local timezone is used.
 
 ### Map Projections
 
-The application supports two coordinate projection systems:
+The default equirectangular projection maps longitude and latitude linearly onto the world map.
 
-- **Equirectangular** (default): Simple linear lat/lon mapping that matches most world map SVG files and images
-- **Mercator**: Web Mercator projection commonly used in web mapping applications
-- **Automatic detection**: Defaults to equirectangular to match the included world map SVG, but can be switched via URL parameter
+The application also provides a Mercator projection option.
 
-### Information Panel
+The included SVG is equirectangular, so the default projection is recommended for correct alignment.
 
-The 3-column solar information panel displays:
+Switching the canvas coordinate projection does not automatically transform the underlying SVG artwork.
 
-- **Date column**: Current date with day length calculation
-- **Sun column**: Sunrise/sunset times with up/down arrows, plus solar noon and golden hour times
-- **Moon column**: Current phase symbol and name with illumination percentage, plus moonrise/moonset times
+## E-Ink Optimization
 
-Location-dependent calculations require either URL parameters (`lat=` and `lon=`) or browser geolocation permission. Without location data, sunrise/sunset and moon rise/set times display as "Unknown".
+The Map Only dashboard was developed with e-ink devices in mind, particularly the Kobo Libra 2.
 
-The map updates every minute to reflect current conditions. When using the `timestamp` parameter, the map displays a static snapshot of that specific moment and does not auto-refresh.
+Design considerations include:
 
-Inspired by [Time and Date Day and Night World Map](https://www.timeanddate.com/worldclock/sunearth.html)
+- Grayscale rendering
+- Strong visual contrast
+- Limited decorative elements
+- Large, readable typography
+- Fixed aspect ratio for geographic accuracy
+- Minimal information density
+- Static screenshot compatibility
 
-## Developing
+The application itself does not control the physical e-ink refresh process.
 
-Test with
+Display refresh behavior, ghosting, dithering, and screenshot generation depend on the client device and rendering software.
 
-```shell
-python3 -m http.server
+## Development
+
+### Local Testing
+
+Clone the repository:
+
+```bash
+git clone https://github.com/p-i-c-o/day-night-map.git
+cd day-night-map
 ```
 
-Then visit [http://localhost:8000/](http://localhost:8000/)
+Start a local HTTP server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Open:
+
+http://localhost:8000/
+
+Or test the dashboard directly:
+
+http://localhost:8000/?maponly&grayscale&showloc&lat=46.2044&lon=6.1432
+
+The Python server serves files from the current directory and does not modify project files. By default, it listens on all network interfaces, so use `--bind 127.0.0.1` if local-only access is desired.
+
+### GitHub Pages Deployment
+
+This fork is hosted at:
+
+https://p-i-c-o.github.io/day-night-map/
+
+GitHub Pages can deploy directly from the repository's default branch.
+
+Configuration:
+
+- **Settings → Pages**
+- Source: Deploy from a branch
+- Branch: `main`
+- Directory: `/ (root)`
+
+After committing changes, GitHub Pages may require some time before the deployment becomes available.
+
+### Development Guidelines
+
+When adding functionality:
+
+- Preserve the behavior of existing URL parameters.
+- Keep normal and minimal modes backward-compatible.
+- Restrict dashboard-specific CSS to `.map-only-mode`.
+- Avoid duplicating HTML element IDs.
+- Keep geographic calculations independent of display formatting.
+- Preserve the existing canvas rendering pipeline.
+- Ensure the SVG and canvas remain aligned.
+- Test location-dependent calculations with explicit coordinates.
+- Test both color and grayscale rendering.
+- Verify rendering at different viewport aspect ratios.
+
+## Credits
+
+Original project: [lanrat/day-night-map](https://github.com/lanrat/day-night-map)
+
+Fork and additional dashboard functionality: [p-i-c-o/day-night-map](https://github.com/p-i-c-o/day-night-map)
+
+Astronomical library: [SunCalc](https://github.com/mourner/suncalc)
+
+Inspired by the [Time and Date Day and Night World Map](https://www.timeanddate.com/worldclock/sunearth.html).
+
+See the repository's license for applicable licensing terms.
