@@ -17,6 +17,9 @@ const use24Hour = urlParams.has('hour24') || hashParams.has('hour24') ||
                  window.location.search.includes('hour24') || 
                  window.location.hash.includes('hour24');
 
+// Dedicated map-only mode
+const isMapOnly = urlParams.has('maponly') || hashParams.has('maponly');
+
 // Check for timestamp parameter (accepts Unix timestamp in seconds or milliseconds)
 let customTimestamp = null;
 if (urlParams.has('timestamp')) {
@@ -251,6 +254,10 @@ if (isGrayscale) {
     document.documentElement.classList.add('grayscale-mode');
 }
 
+if (isMapOnly) {
+    document.documentElement.classList.add('map-only-mode');
+}
+
 // Update location legend based on showloc parameter and mode
 function updateLocationLegend() {
     const locationLegend = document.getElementById('locationLegend');
@@ -295,7 +302,7 @@ const ctx = canvas.getContext('2d');
 
 // Function to update canvas size
 function updateCanvasSize() {
-    if (isMinimal) {
+    if (isMinimal || isMapOnly) {
         // In minimal mode, size canvas to fill container
         const container = document.querySelector('.map-container');
         const rect = container.getBoundingClientRect();
@@ -312,7 +319,7 @@ function updateCanvasSize() {
 updateCanvasSize();
 
 // Update canvas size on window resize in minimal mode
-if (isMinimal) {
+if (isMinimal || isMapOnly) {
     window.addEventListener('resize', () => {
         updateCanvasSize();
         drawMap(); // Redraw after resize
