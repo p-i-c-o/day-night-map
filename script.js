@@ -20,6 +20,66 @@ const use24Hour = urlParams.has('hour24') || hashParams.has('hour24') ||
 // Dedicated map-only mode
 const isMapOnly = urlParams.has('maponly') || hashParams.has('maponly');
 
+
+function updateMapOnlyDashboard(date) {
+    if (!isMapOnly) return;
+
+    const setText = (id, value) => {
+        document.getElementById(id).textContent = value;
+    };
+
+    const formatTime = (value) => value.toLocaleTimeString('en-GB', {
+        timeZone: displayTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+
+    try {
+        const parts = new Intl.DateTimeFormat('en-GB', {
+            timeZone: displayTimezone,
+            year: '2-digit',
+            month: '2-digit',
+            day: '2-digit'
+        }).formatToParts(date);
+
+        const part = type => parts.find(p => p.type === type).value;
+        setText('mapOnlyDate',
+            `${part('year')}/${part('month')}/${part('day')}`);
+    } catch {
+        setText('mapOnlyDate', date.toISOString().slice(2, 10).replaceAll('-', '/'));
+    }
+
+    if (!CONFIG.location.isAvailable) {
+        setText('mapOnlySunrise', '--:--');
+        setText('mapOnlyDaylight', '--');
+        setText('mapOnlySunset', '--:--');
+        return;
+    }
+
+    const result = getSunriseSunset(
+        date,
+        CONFIG.location.latitude,
+        CONFIG.location.longitude
+    );
+
+    if (result.polarDay || result.polarNight) {
+        setText('mapOnlySunrise', '--:--');
+        setText('mapOnlyDaylight',
+            result.polarDay ? '24h 00m' : '0h 00m');
+        setText('mapOnlySunset', '--:--');
+        return;
+    }
+
+    if (result.sunrise && result.sunset) {
+        setText('mapOnlySunrise', formatTime(result.sunrise));
+        setText('mapOnlySunset', formatTime(result.sunset));
+        setText('mapOnlyDaylight',
+            calculateDayLength(result.sunrise, result.sunset)
+                .replace(' daylight', ''));
+    }
+}
+
 // Check for timestamp parameter (accepts Unix timestamp in seconds or milliseconds)
 let customTimestamp = null;
 if (urlParams.has('timestamp')) {
@@ -1181,6 +1241,7 @@ function drawMap() {
     
     // Update solar info panel
     updateSolarInfoPanel(now);
+    updateMapOnlyDashboard(now);
 }
 
 // Initialize location and start the application
@@ -1197,3 +1258,4 @@ initializeLocation().then(() => {
         setInterval(drawMap, CONFIG.performance.updateInterval);
     }
 });
+

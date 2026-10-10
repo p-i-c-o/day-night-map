@@ -385,3 +385,83 @@ h1 {
     width: 100%;
     height: 100%;
 }
+
+
+
+/* Map-only dashboard layout */
+.map-only-header,
+.map-only-footer {
+    display: none;
+}
+
+.map-only-mode .container {
+    box-sizing: border-box;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.map-only-mode .map-only-header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    box-sizing: border-box;
+    padding: 4px 8px 14px;
+    border-bottom: 2px solid #d1d5db;
+    font-size: clamp(28px, 5.5vw, 56px);
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.map-only-mode .map-only-title {
+    color: #9ca3af;
+}
+
+.map-only-mode .map-container {
+    width: min(100%, 200vh);
+    max-height: 68vh;
+    flex-shrink: 1;
+    aspect-ratio: 2 / 1;
+    align-self: center;
+}
+
+.map-only-mode .map-only-footer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 8px 4px;
+    border-top: 2px solid #d1d5db;
+    text-align: left;
+}
+
+.map-only-mode .map-only-footer > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.map-only-mode .map-only-footer > div:nth-child(2) {
+    align-items: center;
+}
+
+.map-only-mode .map-only-footer > div:last-child {
+    align-items: flex-end;
+}
+
+.map-only-mode .stat-label {
+    color: #6b7280;
+    font-size: clamp(12px, 2vw, 18px);
+    font-weight: 600;
+}
+
+.map-only-mode .stat-value {
+    color: #000;
+    font-size: clamp(19px, 3vw, 30px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}

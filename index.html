@@ -12,10 +12,38 @@
 <body>
     <div class="container">
         <h1>Real-Time Day/Night World Map</h1>
+	<section class="map-only-footer">
+    <div>
+        <span class="stat-label">SUNRISE</span>
+        <span id="mapOnlySunrise" class="stat-value">--:--</span>
+    </div>
+    <div>
+        <span class="stat-label">DAYLIGHT</span>
+        <span id="mapOnlyDaylight" class="stat-value">--</span>
+    </div>
+    <div>
+        <span class="stat-label">SUNSET</span>
+        <span id="mapOnlySunset" class="stat-value">--:--</span>
+    </div>
+</section>
         <div class="map-container">
             <img id="worldMap" src="BlankMap-Equirectangular.svg" alt="World Map">
             <canvas id="mapCanvas" width="1000" height="500"></canvas>
         </div>
+        <section class="map-only-footer">
+    <div>
+        <span class="stat-label">SUNRISE</span>
+        <span id="mapOnlySunrise" class="stat-value">--:--</span>
+    </div>
+    <div>
+        <span class="stat-label">DAYLIGHT</span>
+        <span id="mapOnlyDaylight" class="stat-value">--</span>
+    </div>
+    <div>
+        <span class="stat-label">SUNSET</span>
+        <span id="mapOnlySunset" class="stat-value">--:--</span>
+    </div>
+</section>
         
         <div class="legend">
             <div class="legend-item">
