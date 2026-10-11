@@ -23,7 +23,21 @@ const isMapOnly = urlParams.has('maponly') || hashParams.has('maponly');
 
 function updateMapOnlyDashboard(date) {
     if (!isMapOnly) return;
+    const status = document.getElementById('mapOnlyStatus');
 
+    if (CONFIG.location.isAvailable) {
+        const sun = SunCalc.getPosition(
+            date,
+            CONFIG.location.latitude,
+            CONFIG.location.longitude
+        );
+
+        const elevation = sun.altitude * 180 / Math.PI;
+
+        status.textContent = elevation >= 0 ? 'Day' : 'Night';
+    } else {
+        status.textContent = 'Unknown';
+    }
     const setText = (id, value) => {
         document.getElementById(id).textContent = value;
     };
