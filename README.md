@@ -63,7 +63,7 @@ Features:
 - Large date header formatted as `YY/MM/DD`
 - Muted grey "Day / Night" heading
 - Centered world map preserving its 2:1 aspect ratio
-- Sunrise and sunset times
+- Today's sunrise and upcoming sunset during the day; previous sunset and upcoming sunrise at night
 - Calculated daylight duration
 - Minimalist typography using Inter
 - High-contrast grayscale visualization

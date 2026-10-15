@@ -26,15 +26,8 @@ function updateMapOnlyDashboard(date) {
     const status = document.getElementById('mapOnlyStatus');
 
     if (CONFIG.location.isAvailable) {
-        const sun = SunCalc.getPosition(
-            date,
-            CONFIG.location.latitude,
-            CONFIG.location.longitude
-        );
-
-        const elevation = sun.altitude * 180 / Math.PI;
-
-        status.textContent = elevation >= 0 ? 'Day' : 'Night';
+        const sun = SunCalc.getPosition(date, CONFIG.location.latitude, CONFIG.location.longitude);
+        status.textContent = sun.altitude >= 0 ? 'Day' : 'Night';
     } else {
         status.textContent = 'Unknown';
     }
@@ -65,9 +58,11 @@ function updateMapOnlyDashboard(date) {
     }
 
     if (!CONFIG.location.isAvailable) {
-        setText('mapOnlySunrise', '--:--');
+        setText('mapOnlyFirstSunLabel', 'SUNRISE');
+        setText('mapOnlySecondSunLabel', 'SUNSET');
+        setText('mapOnlyFirstSunTime', '--:--');
         setText('mapOnlyDaylight', '--');
-        setText('mapOnlySunset', '--:--');
+        setText('mapOnlySecondSunTime', '--:--');
         return;
     }
 
@@ -78,16 +73,30 @@ function updateMapOnlyDashboard(date) {
     );
 
     if (result.polarDay || result.polarNight) {
-        setText('mapOnlySunrise', '--:--');
+        status.textContent = result.polarDay ? 'Day' : 'Night';
+        setText('mapOnlyFirstSunLabel', 'SUNRISE');
+        setText('mapOnlySecondSunLabel', 'SUNSET');
+        setText('mapOnlyFirstSunTime', '--:--');
         setText('mapOnlyDaylight',
             result.polarDay ? '24h 00m' : '0h 00m');
-        setText('mapOnlySunset', '--:--');
+        setText('mapOnlySecondSunTime', '--:--');
         return;
     }
 
     if (result.sunrise && result.sunset) {
-        setText('mapOnlySunrise', formatTime(result.sunrise));
-        setText('mapOnlySunset', formatTime(result.sunset));
+        const events = getRelevantSunTimes(date, CONFIG.location.latitude, CONFIG.location.longitude);
+        if (events) {
+            status.textContent = events.isDay ? 'Day' : 'Night';
+            setText('mapOnlyFirstSunLabel', events.isDay ? 'SUNRISE' : 'SUNSET');
+            setText('mapOnlySecondSunLabel', events.isDay ? 'SUNSET' : 'SUNRISE');
+            setText('mapOnlyFirstSunTime', formatTime(events.previous));
+            setText('mapOnlySecondSunTime', formatTime(events.next));
+        } else {
+            setText('mapOnlyFirstSunLabel', 'SUNRISE');
+            setText('mapOnlySecondSunLabel', 'SUNSET');
+            setText('mapOnlyFirstSunTime', formatTime(result.sunrise));
+            setText('mapOnlySecondSunTime', formatTime(result.sunset));
+        }
         setText('mapOnlyDaylight',
             calculateDayLength(result.sunrise, result.sunset)
                 .replace(' daylight', ''));
@@ -587,6 +596,35 @@ function getSunriseSunset(date, lat, lng) {
     return { sunrise, sunset };
 }
 
+// Find the sunset/sunrise surrounding night, or sunrise/sunset surrounding day.
+// Sample adjacent solar dates because SunCalc's getTimes date is not a local calendar date.
+function getRelevantSunTimes(date, lat, lng) {
+    const events = [];
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    for (let offset = -2; offset <= 2; offset++) {
+        const times = SunCalc.getTimes(new Date(date.getTime() + offset * dayMs), lat, lng);
+        for (const type of ['sunrise', 'sunset']) {
+            const time = times[type];
+            if (time instanceof Date && !isNaN(time.getTime()) &&
+                !events.some(event => event.type === type && event.time.getTime() === time.getTime())) {
+                events.push({ type, time });
+            }
+        }
+    }
+
+    const previous = events.filter(event => event.time <= date)
+        .sort((a, b) => b.time - a.time)[0];
+    if (!previous) return null;
+
+    const nextType = previous.type === 'sunrise' ? 'sunset' : 'sunrise';
+    const next = events.filter(event => event.type === nextType && event.time > date)
+        .sort((a, b) => a.time - b.time)[0];
+    if (!next) return null;
+
+    return { isDay: previous.type === 'sunrise', previous: previous.time, next: next.time };
+}
+
 /**
  * Calculate day length from sunrise and sunset times
  * @param {Date|null} sunrise - Sunrise time
@@ -693,38 +731,40 @@ function updateSolarInfoPanel(date) {
     document.getElementById('currentDate').textContent = dateString;
     
     // Update sun times (sunrise/sunset) if location is available
+    const firstSunTime = document.getElementById('firstSunTime');
+    const secondSunTime = document.getElementById('secondSunTime');
     if (CONFIG.location.isAvailable) {
         const sunTimes = getSunriseSunset(date, CONFIG.location.latitude, CONFIG.location.longitude);
         
         if (sunTimes.polarNight) {
-            document.getElementById('sunrise').textContent = '❄️ Polar Night';
-            document.getElementById('sunset').textContent = '';
+            firstSunTime.textContent = '❄️ Polar Night';
+            secondSunTime.textContent = '';
             document.getElementById('dayLength').textContent = '0h 0m daylight';
         } else if (sunTimes.polarDay) {
-            document.getElementById('sunrise').textContent = '☀️ Polar Day';
-            document.getElementById('sunset').textContent = '';
+            firstSunTime.textContent = '☀️ Polar Day';
+            secondSunTime.textContent = '';
             document.getElementById('dayLength').textContent = '24h 0m daylight';
         } else if (sunTimes.sunrise && sunTimes.sunset) {
-            const sunriseStr = sunTimes.sunrise.toLocaleTimeString('en-US', {
+            const events = getRelevantSunTimes(date, CONFIG.location.latitude, CONFIG.location.longitude);
+            const formatTime = time => time.toLocaleTimeString('en-US', {
                 timeZone: displayTimezone,
                 hour: 'numeric',
                 minute: '2-digit',
                 hour12: !CONFIG.time.use24Hour
             });
-            const sunsetStr = sunTimes.sunset.toLocaleTimeString('en-US', {
-                timeZone: displayTimezone,
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: !CONFIG.time.use24Hour
-            });
-            
-            document.getElementById('sunrise').textContent = `↑ ${sunriseStr}`;
-            document.getElementById('sunset').textContent = `↓ ${sunsetStr}`;
+
+            if (events) {
+                firstSunTime.textContent = `${events.isDay ? '↑' : '↓'} ${formatTime(events.previous)}`;
+                secondSunTime.textContent = `${events.isDay ? '↓' : '↑'} ${formatTime(events.next)}`;
+            } else {
+                firstSunTime.textContent = `↑ ${formatTime(sunTimes.sunrise)}`;
+                secondSunTime.textContent = `↓ ${formatTime(sunTimes.sunset)}`;
+            }
             document.getElementById('dayLength').textContent = calculateDayLength(sunTimes.sunrise, sunTimes.sunset);
         }
     } else {
-        document.getElementById('sunrise').textContent = 'Location';
-        document.getElementById('sunset').textContent = 'Unknown';
+        firstSunTime.textContent = 'Location';
+        secondSunTime.textContent = 'Unknown';
         document.getElementById('dayLength').textContent = '';
     }
     
